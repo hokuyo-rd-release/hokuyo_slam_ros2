@@ -5,13 +5,19 @@
 緯度・軽度による絶対座標の情報を付与した3D点群地図を作成します。
 
 # ros2 対応
+
+07/28 ros2 bag record のタイムアウト対応 Process ID でrecord をキル。ros2 では timeout コマンドの不具合あり
+https://github.com/ros2/rosbag2/issues/1857
+
+
 04/27 sqlite3 形式の ROS2のROSBAG への対応完了。
 p2o_gnsslog_from_rosbag_ros2.py, p2o_from_rosbag_ros2.py, extract_pcd_ros2.py, pcd_to_Rcord.py
 
 04/27 mcap 形式のROS2のROSBAG への対応対応
 04/27 mcap 形式と sqlite3 形式の両方を1つのコードで対応
 (両方のrosbagがある場合はmcapを優先する。処理が早いから)
-## dependency
+
+- mcapを使う場合に必要なパッケージ
 ```
 # numpy
 pip3 install numpy==1.24.4 (version >=1.17.3 <1.25.0)
@@ -96,16 +102,18 @@ pip3 install open3d
 ```bash
 # config/config.csv
 オプション,指定値,デフォルト値
-gnss_topic,/fix,/fix,
-pointcloud_topic,/hokuyo3d/hokuyo_cloud2,/hokuyo3d3/hokuyo_cloud2,
-lio_topic,/hokuyo_lio/sync_odom,/hokuyo_lio/sync_odom,
+gnss_topic,/fix,/fix, # GNSSのトピック名
+pointcloud_topic,/hokuyo3d/hokuyo_cloud2,/hokuyo3d3/hokuyo_cloud2, # LIOと同期を取る対象の点群データ
+lio_topic,/hokuyo_lio/sync_odom,/hokuyo_lio/sync_odom, # 同期をとるトピックの名前
+run_lio,true,true # lio を実行するかどうか
+gnss_cov_thre,0.01,0.01 # p2o で用いる共分散のしきい値
 ```
-3. Get ROSBAG for p2o 
+3. Get ROSBAG for p2o (example)
 ```bash
 # if you already have <lio_fix_pointcloud-rosbag>, skip this step.
-./get_rosbag.bash <input-rosbag> <lio_fix_pointcloud-rosbag>
+./get_rosbag.bash rosbag/tsukuba_ros2_filter tsukuba_ros2_input
 ```
-4. Run p2o and utility
+4. Run p2o and utility (example)
 ```bash
-./hokuyo_slam.bash <lio_fix_pointcloud-rosbag> <output-directory>
+./hokuyo_slam.bash tsukuba_ros2_input tsukuba_ros2
 ```

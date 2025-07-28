@@ -23,27 +23,27 @@ echo rosbag dir: $rosbag_dir
 echo "All args are checked."
 
 # ファイルが存在するかチェック
-FILE=rosbag/$1
-if [ ! -f "$FILE" ]; then
-  echo "Error: File $FILE does not exist."
+DIR="$1" # $1 はディレクトリパスとして扱う
+if [ ! -d "$DIR" ]; then
+  echo "Error: directory $DIR does not exist."
   exit 1
 else
-  echo "rosbag file: $FILE exists."
+  echo "rosbag directory $DIR exists."
 fi
 
 #------- config.csv 読み込み -------
 if [ "$3" = "" ]; then
-  options=(`cat config/config.csv`)
-  echo option: $options
+  # ヘッダー行をスキップするために tail -n +2 を追加
+  options=(`cat config/config.csv | tail -n +2`)
+  echo "option (from config/config.csv): ${options[@]}"
 else
-  options=(`cat $3`)
-  echo option: $options
+  options=(`cat "$3" | tail -n +2`)
+  echo "option (from $3): ${options[@]}"
 fi
 
 for i in ${!options[@]}; do
- if [ $i -gt 0 ]; then
-  j=$((${i}-1))
-  option_arr[$j]=`echo ${options[$i]} | cut -d ',' -f 2`
+ if [ $i -ge 0 ]; then # 0以上のインデックスで処理
+  option_arr[$i]=`echo ${options[$i]} | cut -d ',' -f 2`
   fi
 done
 
@@ -57,11 +57,52 @@ sleep 3
 source /opt/ros/$ROS_DISTRO/setup.bash
 source $HOME/colcon_ws/install/setup.bash
 
-gnome-terminal --tab -t "Tab 0" -- bash -c "roscore; bash"
-sleep 2
+#gnome-terminal --tab -t "Tab 0" -- bash -c "roscore; bash"
+#sleep 2
 if [ "x${run_lio}" = "xtrue" ]; then
- gnome-terminal --tab -t "hokuyo_lio" -- bash -c "ros2 launch hokuyo_lio hokuyo_lio_node_with_yaml.py; bash"
+ gnome-terminal --tab -t "hokuyo_lio" -- bash -c "ros2 launch hokuyo_lio hokuyo_lio_node_with_yaml_ros2.xml; bash"
 fi
-gnome-terminal --tab -t "ros2 bag play" -- bash -c "cd ${rosbag_dir}; ros2 bag play $1; bash"
-gnome-terminal --tab -t "sync_lio_pc" -- bash -c "echo sync_lio_pc working!!; ros2 run sync_lio_pc sync_lio_pc _point_topic:=${pointcloud_topic}; bash" # rosrun を落としてもroscoreが起動しているとrosrun でパラメータを変更しても残る。
-gnome-terminal --tab -t "ros2 bag record" -- bash -c "cd ${rosbag_dir}; echo timeout $((`ros2 bag info ${rosbag_dir}/$1 | grep -i "duration" | awk '{ print $3 }' | sed -e 's/[^0-9]//g'`)) ros2 bag record -O $2 $gnss_topic $pointcloud_topic $lio_topic; timeout $((`rosbag info ${rosbag_dir}/$1 | grep -i "duration" | awk '{ print $3 }' | sed -e 's/[^0-9]//g'`-10)) ros2 bag record -O $2 $gnss_topic $pointcloud_topic $lio_topic; bash"
+gnome-terminal --tab -t "ros2 bag play" -- bash -c "cd ${CURRENT}; ros2 bag play \"$1\"; bash"
+gnome-terminal --tab -t "sync_lio_pc" -- bash -c "echo sync_lio_pc working!!; ros2 run sync_lio_pc sub_pc_pub_odom; bash" # rosrun を落としてもroscoreが起動しているとrosrun でパラメータを変更しても残る。
+
+# --- 修正箇所: ros2 bag info の duration を確実に整数に変換 ---
+# rosbagディレクトリ内の .db3 ファイルを検索し、そのファイルパスを使用
+BAG_FILE=$(find "$1" -name "*.db3" | head -n 1) # $1 はディレクトリパスと想定
+
+if [ -z "$BAG_FILE" ]; then
+    echo "エラー: 指定されたディレクトリ '$1' 内に .db3 ファイルが見つかりません。"
+    exit 1
+fi
+
+echo "解析対象の ROS 2 bag ファイル: $BAG_FILE"
+
+# ros2 bag info から Duration の秒数（小数点以下を含む）を抽出
+# grep で Duration の行を取得し、awk で括弧内の数値を抽出します
+# awk '{ gsub(/[()s]/, "", $2); print $2 }' は '(123.456s)' から '123.456' を抽出します
+DURATION_RAW=$(ros2 bag info "$BAG_FILE" | grep "Duration:" | awk '{ gsub(/[()s]/, "", $2); print $2 }' | head -n 1)
+
+# 抽出した秒数（浮動小数点数）を整数に変換（小数点以下切り捨て）
+# bash の組み込み算術計算では浮動小数点数を扱えないため、bc コマンドを使用します。
+# `scale=0` で小数点以下を0桁に設定し、`int()` で整数部分を取得します。
+if [ -z "$DURATION_RAW" ]; then
+    echo "エラー: ros2 bag の duration を取得できませんでした。ファイルが有効な ROS 2 bag であるか確認してください。"
+    exit 1
+fi
+
+BAG_DURATION=$(echo "scale=0; ${DURATION_RAW}/1" | bc)
+
+echo "元の ROS 2 bag の Duration (整数化): ${BAG_DURATION}秒"
+
+# 録画時間から10秒を引く
+RECORD_DURATION=$((BAG_DURATION - 10))
+
+# 録画時間が0以下にならないようにチェック
+if [ "$RECORD_DURATION" -le 0 ]; then
+    echo "警告: 計算された録画時間 ($RECORD_DURATION 秒) が0以下です。ros2 bag record は実行されません。"
+    echo "元のrosbagのdurationが10秒以下の場合は、この警告が表示されます。"
+    exit 0
+fi
+
+#gnome-terminal --tab -t "ros2 bag record" -- bash -c "cd ${CURRENT}; echo 'Recording for ${RECORD_DURATION} seconds'; timeout ${RECORD_DURATION} ros2 bag record -o \"$2\" $gnss_topic $pointcloud_topic $lio_topic; bash"
+#gnome-terminal --tab -t "ros2 bag record" -- bash -c "~/colcon_ws/src/hokuyo_navigation2/scripts/rosbag_record_with_timeout.bash $2 ${rosbag_dir} ${RECORD_DURATION} ${gnss_topic} ${pointcloud_topic} ${lio_topic}; bash"
+gnome-terminal --tab -t "ros2 bag record" -- bash -c "~/github/hokuyo_slam_ros2/rosbag_record_with_timeout.bash $2 ${rosbag_dir} ${RECORD_DURATION} ${gnss_topic} ${pointcloud_topic} ${lio_topic}; bash"

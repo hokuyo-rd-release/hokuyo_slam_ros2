@@ -1,7 +1,7 @@
 # $1 playbag name $2 outbag name
 
 #------- 環境変数の確認 -------
-echo ros workspace: ${ROS_WORKSPACE:?ROS_WORKSPACE is Undefined}
+#echo ros workspace: ${ROS_WORKSPACE:?ROS_WORKSPACE is Undefined}
 
 #------- 引数の確認 -------
 # 第1引数
@@ -23,14 +23,14 @@ echo rosbag dir: $rosbag_dir
 echo "All args are checked."
 
 # ファイルが存在するかチェック
-FILE=rosbag/$1
-if [ ! -f "$FILE" ]; then
-  echo "Error: File $FILE does not exist."
+DIR=$1
+if [ ! -d "$DIR" ]; then
+  echo "Error: directory: $DIR does not exist."
   exit 1
 else
-  echo "rosbag file: $FILE exists."
+  echo "rosbag directory: $DIR exists."
 fi
 
 sleep 1
 
-gnome-terminal -- bash -c "~/github/hokuyo_slam/rosbag_lio_fix_pc.bash $1 $2 $3; bash"
+gnome-terminal -- bash -c "~/github/hokuyo_slam_ros2/rosbag_lio_fix_pc.bash $1 $2 $3; bash"
