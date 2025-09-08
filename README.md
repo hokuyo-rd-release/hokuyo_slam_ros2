@@ -1,119 +1,22 @@
-# hokuyo_slam
+# hokuyo_slam_ros2
+This packages is only included C++ lib and utility requirements.
+Please build this packages, and use from shellscript on hokuyo_navigation2 for 3d mapping
 
-このパッケージは、hokuyo_lioの軌跡をRTK-GNSSの情報を使って補正し、
-補正した軌跡に沿って、YVTの3Dスキャン点群を並べて、
-緯度・軽度による絶対座標の情報を付与した3D点群地図を作成します。
-
-# ros2 対応
-
-07/28 ros2 bag record のタイムアウト対応 Process ID でrecord をキル。ros2 では timeout コマンドの不具合あり
-https://github.com/ros2/rosbag2/issues/1857
-
-
-04/27 sqlite3 形式の ROS2のROSBAG への対応完了。
-p2o_gnsslog_from_rosbag_ros2.py, p2o_from_rosbag_ros2.py, extract_pcd_ros2.py, pcd_to_Rcord.py
-
-04/27 mcap 形式のROS2のROSBAG への対応対応
-04/27 mcap 形式と sqlite3 形式の両方を1つのコードで対応
-(両方のrosbagがある場合はmcapを優先する。処理が早いから)
-
-- mcapを使う場合に必要なパッケージ
-```
-# numpy
-pip3 install numpy==1.24.4 (version >=1.17.3 <1.25.0)
-
-# mcap
-
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-# setting path
-
-brew install mcap
-```
-
-## 使用したパッケージ
+## Reference
 - p2o: https://github.com/furo-org/p2o
 - p2o_fastlio_util: https://github.com/kiyoshiiriemon/p2o_fastlio_util
 
-これらのソースコードを改変して使用しました。実行用のbashファイルを北陽電機 髙橋が作成しました。
-
 ## Requirements
 Ubuntu 22.04 ROS2 Humble
-
 This package is dependent on Eigen3, C++14, and pcl 1.14
 
+## Build
+
 ```bash
-# Proj
-sudo apt-get install libsqlite3-dev sqlite3
-wget https://download.osgeo.org/proj/proj-9.4.1.tar.gz
-tar -zxvf proj-9.4.1.tar.gz
-cd proj-9.4.1
-mkdir build
-cd build
-cmake ..
-cmake --build .
-sudo cmake --build . --target install
-
-# for vtk
-sudo apt-get install libeigen3-dev
-sudo apt-get -y install qtbase5-dev
-sudo apt-get -y install clang
-sudo apt-get -y install qtcreator
-sudo apt-get -y install libqt5x11extras5-dev
-
-# pcl 1.14
-cd ~/github
-wget https://github.com/PointCloudLibrary/pcl/releases/download/pcl-1.14.1/source.tar.gz -O pcl.tar.gz
-tar -xvf pcl.tar.gz
-cd pcl
-cmake -Bbuild -DCMAKE_INSTALL_PREFIX=/opt/pcl .
-cmake --build build
-sudo cmake --install build
-export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/opt/pcl
-```
-hokuyo_lio and sync_lio
-```bash
-# 04/27 時点で未対応
-# fast_lio
-
-# hokuyo_slam
-cd ~/github
-git clone -b ros2 https://github.com/Hokuyo-RD/hokuyo_slam.git
-cd hokuyo_slam
-
-# export CMAKE_PREFIX_PATH=/opt/vtk8
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/vtk8/lib
-export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/opt/pcl
-
-mkdir build
-cmake -Bbuild . && cmake --build build
-```
-
-python extract
-```
-sudo apt-get install python3-pip
-pip3 install tqdm
-pip3 install open3d
-```
-
-## Usage
-
-1. locate bag file under the rosbag/
-2. Edit csv file ROSTOPIC name for p2o use.
-```bash
-# config/config.csv
-オプション,指定値,デフォルト値
-gnss_topic,/fix,/fix, # GNSSのトピック名
-pointcloud_topic,/hokuyo3d/hokuyo_cloud2,/hokuyo3d3/hokuyo_cloud2, # LIOと同期を取る対象の点群データ
-lio_topic,/hokuyo_lio/sync_odom,/hokuyo_lio/sync_odom, # 同期をとるトピックの名前
-run_lio,true,true # lio を実行するかどうか
-gnss_cov_thre,0.01,0.01 # p2o で用いる共分散のしきい値
-```
-3. Get ROSBAG for p2o (example)
-```bash
-# if you already have <lio_fix_pointcloud-rosbag>, skip this step.
-./get_rosbag.bash rosbag/tsukuba_ros2_filter tsukuba_ros2_input
-```
-4. Run p2o and utility (example)
-```bash
-./hokuyo_slam.bash tsukuba_ros2_input tsukuba_ros2
+cd
+mkdir github
+git clone -b release https://github.com/Hokuyo-RD/hokuyo_slam_ros2.git
+cd hokuyo_slam_ros2
+chmod +x ./build.bash
+./build.bash
 ```
