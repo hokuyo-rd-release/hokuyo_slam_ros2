@@ -15,6 +15,7 @@ This package is dependent on Eigen3, C++14, and pcl 1.14
 ```bash
 cd
 mkdir github
+cd github
 git clone -b release https://github.com/Hokuyo-RD/hokuyo_slam_ros2.git
 cd hokuyo_slam_ros2
 chmod +x ./build.bash
