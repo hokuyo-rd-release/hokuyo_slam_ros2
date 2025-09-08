@@ -1,0 +1,8 @@
+python3-pip
+libsqlite3-dev
+sqlite3
+libeigen3-dev
+qtbase5-dev
+clang
+qtcreator
+libqt5x11extras5-dev
