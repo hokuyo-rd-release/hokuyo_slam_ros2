@@ -66,7 +66,7 @@ if [ ! -d "pcl" ]; then
   # ビルドとインストール
   cd pcl
   cmake -Bbuild -DCMAKE_INSTALL_PREFIX=/opt/pcl .
-  cmake --build build -j$(nproc)
+  cmake --build build
   sudo cmake --install build
   
   # 環境変数を .bashrc に追記 (重複しないようにチェック)
