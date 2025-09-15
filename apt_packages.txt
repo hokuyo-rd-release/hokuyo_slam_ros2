@@ -1,3 +1,11 @@
+cmake
+build-essential
+curl
+libpcl-dev
+libcurl4-openssl-dev
+libpcap-dev
+freeglut3-dev
+libboost-all-dev
 python3-pip
 libsqlite3-dev
 sqlite3

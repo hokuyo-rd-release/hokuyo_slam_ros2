@@ -6,50 +6,13 @@
 # 必要なシステムパッケージをインストールします。
 echo "必要なシステムパッケージをインストールします..."
 
-#---------------------------------------
-# githubディレクトリの準備
-#---------------------------------------
-cd ~
-if [ ! -d "github" ]; then
-  echo "github ディレクトリが見つかりません。作成して Hokuyo SLAM をクローンします..."
-  mkdir github
-  cd github
-  git clone https://github.com/Hokuyo-RD/hokuyo_slam_ros2.git
-  
-  # 追加されたインストールコマンド
-  cd hokuyo_slam_ros2
-  
-  # apt-get で依存パッケージをインストール
-  echo "apt-get で依存パッケージをインストールします..."
-  sudo apt-get install -y $(cat apt_packages.txt)
-  
-  # pip でPythonパッケージをインストール
-  echo "pip でPythonパッケージをインストールします..."
-  pip3 install -r requirements.txt
-  
-else
-  echo "github ディレクトリはすでに存在します。"
-  cd github
-  # hokuyo_slam_ros2 ディレクトリが存在しない場合のみクローン
-  if [ ! -d "hokuyo_slam_ros2" ]; then
-    echo "hokuyo_slam_ros2 ディレクトリが見つかりません。クローンします..."
-    git clone https://github.com/Hokuyo-RD/hokuyo_slam_ros2.git
-    
-    # 追加されたインストールコマンド
-    cd hokuyo_slam_ros2
-    
-    # apt-get で依存パッケージをインストール
-    echo "apt-get で依存パッケージをインストールします..."
-    sudo apt-get install -y $(cat apt_packages.txt)
-    
-    # pip でPythonパッケージをインストール
-    echo "pip でPythonパッケージをインストールします..."
-    pip3 install -r requirements.txt
-    
-  else
-    echo "hokuyo_slam_ros2 ディレクトリはすでに存在します。"
-  fi
-fi
+# apt-get で依存パッケージをインストール
+echo "apt-get で依存パッケージをインストールします..."
+sudo apt-get install -y $(cat apt_packages.txt)
+
+# pip でPythonパッケージをインストール
+echo "pip でPythonパッケージをインストールします..."
+pip3 install -r requirements.txt
 
 #---------------------------------------
 # PROJ のビルドとインストール (ディレクトリが存在しない場合のみ)
