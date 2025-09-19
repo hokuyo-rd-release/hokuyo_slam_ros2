@@ -161,7 +161,7 @@
  
  int main(int argc, char *argv[])
  {
-     std::string epsg_code = "epsg:6674";
+     std::string epsg_code = "epsg:32653";
      int max_iter = 300;
      int min_iter = 50;
      double robust_threshold = 0.01;
