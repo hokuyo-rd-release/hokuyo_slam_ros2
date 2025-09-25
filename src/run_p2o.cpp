@@ -81,6 +81,40 @@
      return true;
  }
  
+
+ bool loadCenterUTM(const std::string& center_utm_file, int &utm_zone, Eigen::Vector3d &center_utm) {
+     std::ifstream is(center_utm_file);
+     if (!is) {
+         std::cerr << "can't open file: " << center_utm_file << std::endl;
+         return false;
+     }
+
+     std::string line;
+     if (std::getline(is, line)) {
+         std::stringstream ss(line);
+         std::string item;
+         std::vector<std::string> tokens;
+
+         while (std::getline(ss, item, ',')) {
+             tokens.push_back(item);
+         }
+
+         if (tokens.size() >= 4) {
+             utm_zone      = std::stoi(tokens[0]);
+             center_utm(0) = std::stod(tokens[1]);
+             center_utm(1) = std::stod(tokens[2]);
+             center_utm(2) = std::stod(tokens[3]);
+             return true;
+         }
+     }
+     return false;
+ }
+
+ std::string utm_zone_to_epsg(int utm_zone){
+     int epsg_num = utm_zone + 32600;
+     return "EPSG:" + std::to_string(epsg_num);
+ }
+
  Eigen::Vector3d get_lla_from_xyz(Eigen::Vector3d xyz, std::string epsg_code){
      Eigen::Vector3d ret_value;
  
@@ -96,7 +130,7 @@
          ret_value = Eigen::Vector3d::Zero();
      }
      else{
-         a = proj_coord(xyz(1), xyz(0), 0, 0);
+         a = proj_coord(xyz(0), xyz(1), 0, 0);
          b = proj_trans(P, PJ_FWD, a);
  
          ret_value(0) = b.xyz.x;
@@ -110,19 +144,28 @@
      return ret_value;
  }
  
- void sample_g2o_3d(const std::string &filename, int max_iter, int min_iter, double robust_thre, std::string epsg_code)
+ void sample_g2o_3d(const std::string &center_utm_file,const std::string &p2o_file, int max_iter, int min_iter, double robust_thre)
  {
-     std::string fname_in = filename + "_in.txt";
-     std::string fname_out = filename + "_out.txt";
+     std::string fname_in = p2o_file + "_in.txt";
+     std::string fname_out = p2o_file + "_out.txt";
      std::ofstream ofs(fname_in);
      std::ofstream ofs2(fname_out);
+
+     // UTM座標の基準点を読み取り。
+     int utm_zone;
+     Eigen::Vector3d center_utm;
+     if (!loadCenterUTM(center_utm_file, utm_zone, center_utm)) {
+            return;
+     }
+
+
      p2o::Pose3DVec nodes;
      p2o::Optimizer3D optimizer;
      optimizer.setVerbose(true);
      std::vector<p2o::ErrorFunc3D*> error_funcs;
      std::vector<std::tuple<double, double, double>> lla_data;
-     if (!loadP2OFile(filename.c_str(), nodes, error_funcs, lla_data)) {
-         std::cout << "can't open file: " << filename << std::endl;
+     if (!loadP2OFile(p2o_file.c_str(), nodes, error_funcs, lla_data)) {
+         std::cout << "can't open file: " << p2o_file << std::endl;
          return;
      }
      optimizer.setRobustThreshold(robust_thre);
@@ -130,14 +173,14 @@
      p2o::Pose3DVec result = optimizer.optimizePath(nodes, error_funcs, max_iter, min_iter);
      auto t1 = std::chrono::high_resolution_clock::now();
      auto elapsed = std::chrono::duration_cast< std::chrono::microseconds> (t1-t0);
-     std::cout << filename << ": " << elapsed.count()*1e-6 << "s" << std::endl;
+     std::cout << p2o_file << ": " << elapsed.count()*1e-6 << "s" << std::endl;
      ofs << std::fixed << std::setprecision(10);
      ofs2 << std::fixed << std::setprecision(10);
      for(int i=0; i<result.size(); i++) {
          Eigen::Vector3d result_xyz;
          Eigen::Vector3d result_lla;
          result_xyz << result[i].x , result[i].y , result[i].z ;
-         result_lla = get_lla_from_xyz(result_xyz,epsg_code);
+         result_lla = get_lla_from_xyz(result_xyz + center_utm, utm_zone_to_epsg(utm_zone));
  
          Eigen::Quaterniond q1 = nodes[i].rv.toQuaternion();
          Eigen::Quaterniond q2 = result[i].rv.toQuaternion();
@@ -161,7 +204,6 @@
  
  int main(int argc, char *argv[])
  {
-     std::string epsg_code = "epsg:32653";
      int max_iter = 300;
      int min_iter = 50;
      double robust_threshold = 0.01;
@@ -186,7 +228,7 @@
      if (optind >= argc) {
          show_usage_and_exit();
      }
-     sample_g2o_3d(argv[optind], max_iter, min_iter, robust_threshold, epsg_code);
+     sample_g2o_3d(argv[optind],argv[optind+1], max_iter, min_iter, robust_threshold);
  
      return 0;
  }
