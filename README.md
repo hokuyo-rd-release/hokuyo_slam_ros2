@@ -13,6 +13,11 @@ This package is dependent on Eigen3, C++14, and pcl 1.14
 ## Build
 
 ```bash
+# python
+sudo apt-get install python3-pip
+pip3 install numpy==1.24.4 (version >=1.17.3 <1.25.0)
+pip3 install tqdm
+pip3 install open3d
 
 # for vtk
 sudo apt-get install libeigen3-dev
@@ -22,14 +27,14 @@ sudo apt-get -y install qtcreator
 sudo apt-get -y install libqt5x11extras5-dev
 
 # vtk
-wget https://www.vtk.org/files/release/8.2/VTK-8.2.0.tar.gz
-tar -xvf VTK-8.2.0.tar.gz
-cd VTK-8.2.0
-cmake -DCMAKE_BUILD_TYPE=Release -DVTK_Group_Qt=ON -DCMAKE_INSTALL_PREFIX=/opt/vtk8 -Bbuild .
-cmake --build build/
-sudo cmake --install build
-export CMAKE_PREFIX_PATH=/opt/vtk8
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/vtk8/lib
+# wget https://www.vtk.org/files/release/8.2/VTK-8.2.0.tar.gz
+# tar -xvf VTK-8.2.0.tar.gz
+# cd VTK-8.2.0
+# cmake -DCMAKE_BUILD_TYPE=Release -DVTK_Group_Qt=ON -DCMAKE_INSTALL_PREFIX=/opt/vtk8 -Bbuild .
+# cmake --build build/
+# sudo cmake --install build
+# export CMAKE_PREFIX_PATH=/opt/vtk8
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/vtk8/lib
 
 # pcl 1.14
 wget https://github.com/PointCloudLibrary/pcl/releases/download/pcl-1.14.1/source.tar.gz -O pcl.tar.gz
