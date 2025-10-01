@@ -52,5 +52,8 @@ export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/opt/pcl
     bash ./ros2_sample_script/hokuyo_slam.bash <使用するrosbag名> <出力する地図名>
     # ex) bash ./ros2_sample_script/hokuyo_slam.bash toyonaka_2025 toyonaka_map
     ```
+1. 実行結果のp2oファイル等は `hokuyo_slam_ros2/ros2_sample_script/data/<出力する地図名>/*`に出力されます
+1. 実行結果の点群地図は `hokuyo_slam_ros2/ros2_sample_script/map/<出力する地図名>.pcd`に出力されます
+
 ## 定例打ち合わせで報告したテストスクリプト
 `hokuyo_slam_ros2/ros2_sample_script/p2o_from_rosbag_ros2_test_z.py/` で、rosbagから読み込む際に2秒おきにz方向を1m上昇させるテストを行った。

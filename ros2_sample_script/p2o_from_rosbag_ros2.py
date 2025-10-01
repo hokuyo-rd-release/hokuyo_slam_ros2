@@ -168,7 +168,7 @@ if __name__ == "__main__":
     lio_topic_name = args[2]
     gnss_topic_name = args[3]
     gnss_cov_thre = float(args[4])
-    gnss_xyz_diff_thre_min = 0 #取り敢えず決め打ちにしている。パラメーター化したい。
+    gnss_xyz_diff_thre_min = 0 #GNSSの移動距離のしきい値を設定（検証用）。
 
     mcap_files = glob.glob(os.path.join(bag_folder, '*.mcap'))
     db_file = find_db_file(bag_folder)
