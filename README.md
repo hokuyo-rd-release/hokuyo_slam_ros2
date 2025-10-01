@@ -13,11 +13,44 @@ This package is dependent on Eigen3, C++14, and pcl 1.14
 ## Build
 
 ```bash
-cd
-mkdir github
-cd github
-git clone -b release https://github.com/Hokuyo-RD/hokuyo_slam_ros2.git
-cd hokuyo_slam_ros2
-chmod +x ./build.bash
-./build.bash
+
+# for vtk
+sudo apt-get install libeigen3-dev
+sudo apt-get -y install qtbase5-dev
+sudo apt-get -y install clang
+sudo apt-get -y install qtcreator
+sudo apt-get -y install libqt5x11extras5-dev
+
+# vtk
+wget https://www.vtk.org/files/release/8.2/VTK-8.2.0.tar.gz
+tar -xvf VTK-8.2.0.tar.gz
+cd VTK-8.2.0
+cmake -DCMAKE_BUILD_TYPE=Release -DVTK_Group_Qt=ON -DCMAKE_INSTALL_PREFIX=/opt/vtk8 -Bbuild .
+cmake --build build/
+sudo cmake --install build
+export CMAKE_PREFIX_PATH=/opt/vtk8
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/vtk8/lib
+
+# pcl 1.14
+wget https://github.com/PointCloudLibrary/pcl/releases/download/pcl-1.14.1/source.tar.gz -O pcl.tar.gz
+tar -xvf pcl.tar.gz
+cd pcl
+cmake -Bbuild -DCMAKE_INSTALL_PREFIX=/opt/pcl .
+cmake --build build
+sudo cmake --install build
+export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/opt/pcl
+
 ```
+
+## ros2 sample run
+1. 使用するrosbag(.db3,.yamlを含むフォルダ)を `hokuyo_slam_ros2/ros2_sample_script/rosbag/` に移す
+1. `hokuyo_slam_ros2/ros2_sample_script/hokuyo_slam.bash/` の11行目に、スクリプトが入っているディレクトリのフルパスを記入する
+1. トピック名、GNSS共分散のしきい値[m^2]を `hokuyo_slam_ros2/ros2_sample_script/config/config.csv` に記入
+1. スクリプト実行
+    ```bash
+    cd <hokuyo_slam_ros2_dir>
+    bash ./ros2_sample_script/hokuyo_slam.bash <使用するrosbag名> <出力する地図名>
+    # ex) bash ./ros2_sample_script/hokuyo_slam.bash toyonaka_2025 toyonaka_map
+    ```
+## 定例打ち合わせで報告したテストスクリプト
+`hokuyo_slam_ros2/ros2_sample_script/p2o_from_rosbag_ros2_test_z.py/` で、rosbagから読み込む際に2秒おきにz方向を1m上昇させるテストを行った。
