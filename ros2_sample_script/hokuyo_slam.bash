@@ -8,7 +8,7 @@ source ~/.bashrc
 ROS2_WS="${HOME}/colcon_ws"
 
 # SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT_DIR="/home/ubuntu/github/hokuyo_slam_ros2/ros2_sample_script"
+SCRIPT_DIR="/home/hokuyo/hokuyo_lib/hokuyo_slam_ros2/ros2_sample_script"
 HOKUYO_SLAM_WS="$(dirname "${SCRIPT_DIR}")"
 
 # 実行方法
