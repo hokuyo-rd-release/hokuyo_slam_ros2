@@ -88,6 +88,7 @@ sleep 1
 cd $SCRIPT_DIR
 
 # ディレクトリ作成
+rm -rf data/$2
 mkdir -p data/$2
 mkdir -p data/$2/PCDs
 
@@ -121,7 +122,7 @@ elif [ ${fix_rate} -eq 1 ] ; then
 
   sleep 1
   # p2o　正常終了の場合のみ処理を実行したい。
-  bash -c "python3 ${SCRIPT_DIR}/p2o_from_rosbag_ros2.py ${SCRIPT_DIR}/rosbag/$1 $lio_topic $gnss_topic $gnss_cov_thre ${SCRIPT_DIR}/data/$2/center_lat_lon_alt.txt ${SCRIPT_DIR}/data/$2/center_utm.txt > ${SCRIPT_DIR}/data/$2/output.p2o" # 引数2 input.bag
+  bash -c "python3 ${SCRIPT_DIR}/p2o_from_rosbag_ros2.py ${SCRIPT_DIR}/rosbag/$1 $lio_topic $gnss_topic $gnss_cov_thre ${SCRIPT_DIR}/data/$2/center_lat_lon_alt.txt ${SCRIPT_DIR}/data/$2/center_utm.txt ${SCRIPT_DIR}/data/$2/lio_edge_timestamps.txt > ${SCRIPT_DIR}/data/$2/output.p2o"
   result=$?
 
   echo 'error status:' ${result}
@@ -132,8 +133,8 @@ elif [ ${fix_rate} -eq 1 ] ; then
 
     # p2o_fastlio_util
     cd ${SCRIPT_DIR}/data/$2/PCDs 
-
-    bash -c "python3 ${SCRIPT_DIR}/extract_pcd_ros2.py ${SCRIPT_DIR}/rosbag/$1 $pointcloud_topic" # ~/p2o_fastlio_util/extract_pcd 引数1 + 引数2
+    
+    bash -c "python3 ${SCRIPT_DIR}/extract_pcd_ros2.py ${SCRIPT_DIR}/rosbag/$1 $pointcloud_topic ${SCRIPT_DIR}/data/$2/lio_edge_timestamps.txt" # ~/p2o_fastlio_util/extract_pcd 引数1 + 引数2
 
     # p2o_fastlio_util におけるファイル整理
     cd ./..

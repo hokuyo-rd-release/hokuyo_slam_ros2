@@ -160,11 +160,12 @@ def latlon_to_xyz(trans, lat, lon, alt):
 
 if __name__ == "__main__":
     args = sys.argv
-    assert len(args) >= 5, "Usage: ros2 run your_package_name your_script_name <bag_folder> <lio_topic> <gnss_topic> <gnss_cov_threshold> <output_center_lla_file_path> <output_center_utm_path>"
+    assert len(args) >= 7, "Usage: ros2 run your_package_name your_script_name <bag_folder> <lio_topic> <gnss_topic> <gnss_cov_threshold> <output_center_lla_file_path> <output_center_utm_path> <output_lio_edge_timestamps_path>"
 
     bag_folder = os.path.normpath(os.path.join(os.getcwd(), args[1]))
     center_lat_lon_alt_path = os.path.normpath(os.path.join(os.getcwd(), args[5]))
     center_utm_path = os.path.normpath(os.path.join(os.getcwd(), args[6]))
+    lio_edge_timestamps_path = os.path.normpath(os.path.join(os.getcwd(), args[7]))
     lio_topic_name = args[2]
     gnss_topic_name = args[3]
     gnss_cov_thre = float(args[4])
@@ -320,6 +321,11 @@ if __name__ == "__main__":
             if closest_lio_id > 0 and closest_lio_id <= id_counter:
                 edges.append(f'EDGE_LIN3D 0 {closest_lio_id} {x} {y} {z} {gnss_infom}')
                 edges.append(f'EDGE_LLA 0 {closest_lio_id} {msg.latitude} {msg.longitude} {msg.altitude}')
+
+    # LIOのtimestampの保存
+    with open(lio_edge_timestamps_path, "w") as f:
+        for ts in lio_edge_timestamps:
+            f.write(f"{ts}\n")
 
     for v in vertices:
         if v is not None:
