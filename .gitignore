@@ -1,6 +1,6 @@
 .vscode/
 data/
 /build/
-rosbag/
+# rosbag/
 scripts/__pycache__/
 *.code-workspace
