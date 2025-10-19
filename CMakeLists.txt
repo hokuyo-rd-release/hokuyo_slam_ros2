@@ -11,7 +11,6 @@ set(PROJECT_REARRANGE rearrange_pointcloud)
 project(${PROJECT_REARRANGE})
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 find_package(PCL 1.14)
@@ -19,14 +18,10 @@ find_package(Eigen3 REQUIRED)
 find_package(PROJ REQUIRED)
 
 include_directories(
+  include # <--- json.hpp がここにある
   ${PROJ_INCLUDE_DIRS}
-)
-
-include_directories(
-        ${PROJ_INCLUDE_DIRS}
-)
-include_directories(include
-        ${EIGEN3_INCLUDE_DIR}
+  ${PCL_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIR}
 )
 include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
@@ -37,7 +32,10 @@ add_executable(run_p2o src/run_p2o.cpp)
 target_link_libraries(run_p2o p2o Eigen3::Eigen ${PROJ_LIBRARIES})
 
 add_executable(${PROJECT_REARRANGE} src/rearrange_pointcloud.cpp)
-target_link_libraries(rearrange_pointcloud ${PCL_LIBRARIES} Eigen3::Eigen)
+target_link_libraries(${PROJECT_REARRANGE} 
+    ${PCL_LIBRARIES} 
+    Eigen3::Eigen
+)
 
 
 set(BUILD_VIEWER OFF CACHE BOOL "Build p2o viewer")
@@ -48,4 +46,3 @@ endif(PCL_FOUND)
 if(BUILD_VIEWER)
     add_subdirectory(p2o_viewer)
 endif(BUILD_VIEWER)
-
