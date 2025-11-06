@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
         
         // 残りのリストの最後2つを削除
         // erase(最後尾から数えたイテレータ, 最後尾のイテレータ)
-        waypoints_list.erase(waypoints_list.end() - 2, waypoints_list.end());
+        // waypoints_list.erase(waypoints_list.end() - 2, waypoints_list.end());
 
         std::cout << "情報: Waypointリストの最初2つと最後2つの要素を削除しました。" << std::endl;
     } else if (waypoints_list.size() > 0) {
