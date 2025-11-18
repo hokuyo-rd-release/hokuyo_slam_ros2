@@ -171,7 +171,7 @@ int main(int argc, char *argv[]) {
     if (waypoints_list.size() > min_waypoints) {
         // 最初2つを削除 (0番目と1番目)
         // erase(開始イテレータ, 終了イテレータ)
-        waypoints_list.erase(waypoints_list.begin(), waypoints_list.begin() + 2);
+        // waypoints_list.erase(waypoints_list.begin(), waypoints_list.begin() + 2);
         
         // 残りのリストの最後2つを削除
         // erase(最後尾から数えたイテレータ, 最後尾のイテレータ)
