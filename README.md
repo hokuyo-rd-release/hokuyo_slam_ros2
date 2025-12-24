@@ -15,7 +15,7 @@ This package is dependent on Eigen3, C++14, and pcl 1.14
 ```bash
 # python
 sudo apt-get install python3-pip
-pip3 install numpy==1.24.4 (version >=1.17.3 <1.25.0)
+pip3 install numpy==1.22.4 (version >=1.17.3 <1.25.0)
 pip3 install tqdm
 pip3 install open3d
 
@@ -25,16 +25,6 @@ sudo apt-get -y install qtbase5-dev
 sudo apt-get -y install clang
 sudo apt-get -y install qtcreator
 sudo apt-get -y install libqt5x11extras5-dev
-
-# vtk
-# wget https://www.vtk.org/files/release/8.2/VTK-8.2.0.tar.gz
-# tar -xvf VTK-8.2.0.tar.gz
-# cd VTK-8.2.0
-# cmake -DCMAKE_BUILD_TYPE=Release -DVTK_Group_Qt=ON -DCMAKE_INSTALL_PREFIX=/opt/vtk8 -Bbuild .
-# cmake --build build/
-# sudo cmake --install build
-# export CMAKE_PREFIX_PATH=/opt/vtk8
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/vtk8/lib
 
 # pcl 1.14
 wget https://github.com/PointCloudLibrary/pcl/releases/download/pcl-1.14.1/source.tar.gz -O pcl.tar.gz
@@ -57,7 +47,8 @@ cmake --build .
 sudo cmake --build . --target install
 
 ## hokuyo_slam_ros2
-cd <YOUR_ROS2_WORKSPACE>/src/hokuyo_navigation2/hokuyo_slam_ros2
+git clone https://github.com/hokuyo-rd/hokuyo_slam_ros2.git
+cd hokuyo_slam_ros2
 export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/opt/pcl
 
 mkdir build
