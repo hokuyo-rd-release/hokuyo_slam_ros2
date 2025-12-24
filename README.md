@@ -56,6 +56,13 @@ cmake ..
 cmake --build .
 sudo cmake --build . --target install
 
+## hokuyo_slam_ros2
+cd <YOUR_ROS2_WORKSPACE>/src/hokuyo_navigation2/hokuyo_slam_ros2
+export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/opt/pcl
+
+mkdir build
+cmake -Bbuild . && cmake --build build
+
 ```
 
 ## ros2 sample run
@@ -70,6 +77,3 @@ sudo cmake --build . --target install
     ```
 1. 実行結果のp2oファイル等は `hokuyo_slam_ros2/ros2_sample_script/data/<出力する地図名>/*`に出力されます
 1. 実行結果の点群地図は `hokuyo_slam_ros2/ros2_sample_script/map/<出力する地図名>.pcd`に出力されます
-
-## 定例打ち合わせで報告したテストスクリプト
-`hokuyo_slam_ros2/ros2_sample_script/p2o_from_rosbag_ros2_test_z.py/` で、rosbagから読み込む際に2秒おきにz方向を1m上昇させるテストを行った。
