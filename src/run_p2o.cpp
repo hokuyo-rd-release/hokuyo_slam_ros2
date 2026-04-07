@@ -77,6 +77,25 @@
              sstrm >> id1 >> id2 >> lat >> lon >> alt;
              lla_data.emplace_back(lat, lon, alt);
          }
+         else if (tag=="EDGE_GRAVITY"){
+            int id1, id2;
+            double gx, gy, gz;
+            auto *err = new ErrorFunc3D_Gravity();
+            sstrm >> id1 >> id2 >> gx >> gy>> gz;
+            err->info = Mat6D::Zero();
+            for(int i=0; i<2; i++) {
+                for(int j=i; j<2; j++) {
+                    double val;
+                    sstrm >> val;
+                    err->info(i,j) = val;
+                    err->info(j,i) = val;
+                }
+            }
+            err->ida = id1;
+            err->idb = id2;
+            err->setGravity(gx, gy, gz);
+            errorfuncs.push_back(err);
+         }
      }
      return true;
  }
