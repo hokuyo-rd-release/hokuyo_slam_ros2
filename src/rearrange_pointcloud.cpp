@@ -46,8 +46,8 @@ int main(int argc, char *argv[]) {
     // ----------------------------------------------------------------------
     // 1. 引数の確認と初期設定
     // ----------------------------------------------------------------------
-    if (argc != 4) { 
-        std::cerr << "使用法: " << argv[0] << " <ログファイル名> <PCD出力ファイル名のベース> <JSON出力ファイル名>" << std::endl;
+    if (argc < 4) { 
+        std::cerr << "使用法: " << argv[0] << " <ログファイル名> <PCD出力ファイル名のベース> <JSON出力ファイル名> [点群結合間隔(行)] [Waypoint設置間隔(m)]" << std::endl;
         return 1;
     }
 
@@ -66,12 +66,22 @@ int main(int argc, char *argv[]) {
     // JSONの出力ファイル名 (argv[3]から直接読み込む)
     std::string outjson_name = argv[3]; 
 
+    // 引数から間隔設定を読み込み (指定がない場合はデフォルト値を使用)
+    int merge_interval = 1;      // デフォルト: 10行
+    double min_distance_m = 4.0;  // デフォルト: 4.0m
+
+    if (argc >= 5) {
+        merge_interval = std::stoi(argv[4]);
+    }
+    if (argc >= 6) {
+        min_distance_m = std::stod(argv[5]);
+    }
+
     pcl::PointCloud<pcl::PointXYZ>::Ptr merged_cloud(new pcl::PointCloud<pcl::PointXYZ>);
     
     // Waypoint抽出用の変数
     double last_wp_x = 0.0;
     double last_wp_y = 0.0;
-    const double MIN_DISTANCE_M = 4.0; // Waypoint抽出の最小距離間隔 (4.0 m)
     json waypoints_list = json::array(); // JSON配列としてウェイポイントを格納
     
     double first_wp_x = 0.0;
@@ -84,8 +94,8 @@ int main(int argc, char *argv[]) {
     // ----------------------------------------------------------------------
     while (std::getline(file, line)) {
         ++cnt;
-        // 点群の結合は10行に1回行う (既存のロジックを維持)
-        if (cnt % 10 != 0) continue; 
+        // 指定された行数おきに処理を行う
+        if (cnt % merge_interval != 0) continue; 
         
         std::istringstream iss(line);
         std::string filename;
@@ -121,7 +131,7 @@ int main(int argc, char *argv[]) {
         double current_y = static_cast<double>(y);
         
         if (waypoints_list.empty() || 
-            calculate_distance_2d(current_x, current_y, last_wp_x, last_wp_y) >= MIN_DISTANCE_M) 
+            calculate_distance_2d(current_x, current_y, last_wp_x, last_wp_y) >= min_distance_m) 
         {
             // Waypointリストが空の場合、このポーズを最初の Waypoint として記録
             if (waypoints_list.empty()) {
